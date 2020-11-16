@@ -164,11 +164,8 @@ Prints vector to standard output.
 Inputs:
     -vector A.
 */
-void printVec(const vec &v) {
-    for (int i = 0; i < v.size(); i++) {
-        cout << v[i] << ' ';
-    }
-    cout << endl;
+void print(const vec &v) {
+    print(matrix(1, v));
 }
 
 /*
@@ -177,9 +174,6 @@ Prints only the real components of each vector cell to standard output.
 Inputs:
     -vector A.
 */
-void printVecReal(const vec &v) {
-    for (int i = 0; i < v.size(); i++) {
-        cout << real(v[i]) << ' ';
-    }
-    cout << endl;
+void printReal(const vec &v) {
+    printReal(matrix(1, v));
 }
