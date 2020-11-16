@@ -5,7 +5,7 @@
 
 struct qcs {
     matrix qubits; // Initial qubits
-    vector<double> bell; // Bell state
+    vec bell; // Bell state
 
     const matrix Xm = {{0, 1}, {1, 0}}; // Matrix for negation
     const matrix CNOTm = {{1,0,0,0},{0,1,0,0},{0,0,0,1},{0,0,1,0}}; // Matrix for CNOT (controlled not)
