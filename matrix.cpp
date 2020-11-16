@@ -183,9 +183,3 @@ void printVecReal(const vec &v) {
     }
     cout << endl;
 }
-
-int main() {
-    vec u = multiply({{1,2,3},{4,5,6}}, {8,-2,3});
-
-    printVecReal(u);
-}
