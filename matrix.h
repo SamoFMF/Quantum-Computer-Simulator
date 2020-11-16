@@ -7,9 +7,9 @@ using namespace std;
 
 typedef vector<vector<double>> matrix;
 
-void multiply(const matrix &A, const matrix &B, matrix &C);
+matrix multiply(const matrix &A, const matrix &B);
 
-void eye(int nrows, int ncols, matrix &M);
+matrix eye(const int nrows, const int ncols);
 
 void print(const matrix &M);
 
