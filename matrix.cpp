@@ -74,6 +74,19 @@ matrix eye(int nrows, int ncols) {
 }
 
 /*
+Creates a square identity matrix.
+
+Inputs:
+    -int n: matrix dimensions.
+
+Output:
+    -(n x n) identity matrix M.
+*/
+matrix eye(int n) {
+    return eye(n, n);
+}
+
+/*
 Calculate the tensor product (Kronecker product) of 2 matrices.
 
 Inputs:
