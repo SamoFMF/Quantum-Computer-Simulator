@@ -190,3 +190,10 @@ Inputs:
 void printReal(const vec &v) {
     printReal(matrix(1, v));
 }
+
+void printRes(const vector<double> &v) {
+    for (unsigned int i = 0; i < v.size(); i++) {
+        cout << v[i] << ' ';
+    }
+    cout << '\n';
+}

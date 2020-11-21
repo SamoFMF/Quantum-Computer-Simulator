@@ -3,6 +3,7 @@
 
 #include <string>
 
+std::string intToString(int x, int y);
 std::string intToString(int x);
 
 

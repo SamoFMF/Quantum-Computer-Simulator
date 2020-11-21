@@ -29,6 +29,8 @@ void print(const vec &v);
 
 void printReal(const vec &v);
 
+void printRes(const vector<double> &v);
+
 
 
 #endif
