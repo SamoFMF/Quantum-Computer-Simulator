@@ -16,5 +16,6 @@ int main() {
     q.H({0,1,2});
     q.useOracle(0, Uf);
     q.H({0,1});
-    print(q.qubits); // We get 11x, which means function is balanced (correct)
+
+    q.results();
 }

@@ -4,6 +4,9 @@
 #include "qcs.h"
 #include "gates.h"
 #include <math.h>
+#include <utility>
+#include "utility.h"
+#include <iostream>
 
 struct qcs {
     vec qubits; // Complex amplitudes of all qubits
@@ -358,6 +361,23 @@ struct qcs {
 
     void CCX(vector<unsigned int> idxs) {
         useOracles(idxs, CCXm);
+    }
+
+    string measure() {
+        
+    }
+
+    void results(double err = 1e-16) {
+        vector<pair<string, double>> res;
+        double probability;
+        string niz;
+        for (unsigned int i = 0; i < qubits.size(); i++) {
+            probability = norm(qubits[i]);
+            if (probability < err) continue;
+            niz = intToString(i);
+            niz = string(n-niz.length(), '0').append(niz);
+            cout << niz << ' ' << probability << '\n';
+        }
     }
 
 
