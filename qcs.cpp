@@ -4,11 +4,14 @@
 #include "qcs.h"
 #include "gates.h"
 #include "utility.h"
+#include "circuitView.h"
 
 #include <math.h>
 #include <iostream>
 #include <ctime>
 #include <random>
+#include <string>
+
 
 struct qcs {
     vec qubits; // Complex amplitudes of all qubits
@@ -18,6 +21,8 @@ struct qcs {
     // Create random generator and distribution
     mt19937_64 generator; // This will be initialized based on current time
     uniform_real_distribution<double> distribution; // This will be initialized to interval [0,1]
+    string neki;
+    circuitView view;
 
 
     qcs(string qs = "0") : generator((unsigned int) time(0)), distribution(0, 1) {
@@ -28,6 +33,7 @@ struct qcs {
         }
 
         setupQubits(Q);
+        view.begin(qs);
     }
 
     /*
@@ -133,6 +139,7 @@ struct qcs {
     */
     void SWP(unsigned int idx = 0) {
         useOracle(idx, SWPm);
+        view.swap(idx);
     }
 
     void SWP(vector<unsigned int> idxs) {
@@ -221,10 +228,12 @@ struct qcs {
     */
     void X(unsigned int idx = 0) {
         useOracle(idx, Xm);
+        view.smallBox("X",{idx});
     }
 
     void X(vector<unsigned int> idxs) {
         useOracles(idxs, Xm);
+        view.smallBox("X",idxs);
     }
 
     /*
@@ -235,10 +244,12 @@ struct qcs {
     */
     void H(unsigned int idx = 0) {
         useOracle(idx, Hm);
+        view.smallBox("H",{idx});
     }
 
     void H(vector<unsigned int> idxs) {
         useOracles(idxs, Hm);
+        view.smallBox("H",idxs);
     }
 
     /*
@@ -249,10 +260,12 @@ struct qcs {
     */
     void Y(unsigned int idx = 0) {
         useOracle(idx, Ym);
+        view.smallBox("Y",{idx});
     }
 
     void Y(vector<unsigned int> idxs) {
         useOracles(idxs, Ym);
+        view.smallBox("Y",idxs);
     }
 
     /*
@@ -263,10 +276,12 @@ struct qcs {
     */
     void Z(unsigned int idx = 0) {
         useOracle(idx, Zm);
+        view.smallBox("Z",{idx});
     }
 
     void Z(vector<unsigned int> idxs) {
         useOracles(idxs, Zm);
+        view.smallBox("Z",idxs);
     }
 
     /*
@@ -277,10 +292,15 @@ struct qcs {
     */
     void CX(unsigned int idx = 0) {
         useOracle(idx, CXm);
+        view.smallControlledBox("CNOT",idx);
     }
 
     void CX(vector<unsigned int> idxs) {
         useOracles(idxs, CXm);
+        for (int i = 0; i < idxs.size(); i++)
+        {
+            view.smallControlledBox("CNOT",idxs[i]);
+        }   
     }
 
     /*
@@ -292,10 +312,15 @@ struct qcs {
     */
     void CX2(unsigned int idx = 0) {
         useOracle(idx, CX2m);
+        view.smallControlledBox("CNOT2",idx);
     }
 
     void CX2(vector<unsigned int> idxs) {
         useOracles(idxs, CX2m);
+        for (int i = 0; i < idxs.size(); i++)
+        {
+            view.smallControlledBox("CNOT2",idxs[i]);
+        }   
     }
 
     void CX(unsigned int i, unsigned int j) {
@@ -320,10 +345,12 @@ struct qcs {
     */
     void SQX(unsigned int idx = 0) {
         useOracle(idx, SQXm);
+        view.smallBox("SQX",{idx});
     }
 
     void SQX(vector<unsigned int> idxs) {
         useOracles(idxs, SQXm);
+        view.smallBox("SQX",idxs);
     }
 
     /*
@@ -335,10 +362,12 @@ struct qcs {
     */
     void R(unsigned int idx = 0, double phi = 0) {
         useOracle(idx, Rm(phi));
+        view.smallBox("R",{idx});
     }
 
     void R(vector<unsigned int> idxs, double phi) {
         useOracles(idxs, Rm(phi));
+        view.smallBox("R",idxs);
     }
 
     /*
@@ -350,14 +379,23 @@ struct qcs {
     */
     void CR(unsigned int idx = 0, double phi = 0) {
         useOracle(idx, CRm(phi));
+        view.smallControlledBox("CR",idx);
     }
 
     void CR(vector<unsigned int> idxs, double phi) {
         useOracles(idxs, CRm(phi));
+        for (int i = 0; i < idxs.size(); i++)
+        {
+            view.smallControlledBox("CR",idxs[i]);
+        }  
     }
 
     void CR(vector<unsigned int> idxs) {
         useOracles(idxs, CRm(0));
+        for (int i = 0; i < idxs.size(); i++)
+        {
+            view.smallControlledBox("CR",idxs[i]);
+        }  
     }
 
     void CR(unsigned int i, unsigned int j, double phi) {

@@ -33,3 +33,6 @@
 
 # Json files
 *.json
+vc140.pdb
+qc_sim.pdb
+qc_sim.ilk
