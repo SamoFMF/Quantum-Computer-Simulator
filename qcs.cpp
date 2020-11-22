@@ -3,13 +3,23 @@
 #include "matrix.h"
 #include "qcs.h"
 #include "gates.h"
+#include "utility.h"
+
 #include <math.h>
+#include <iostream>
+#include <ctime>
+#include <random>
 
 struct qcs {
     vec qubits; // Complex amplitudes of all qubits
     unsigned int n; // Number of qubits
 
-    qcs(string qs = "0") {
+    // Create random generator and distribution
+    mt19937_64 generator; // This will be initialized based on current time
+    uniform_real_distribution<double> distribution; // This will be initialized to interval [0,1]
+
+
+    qcs(string qs = "0") : generator((unsigned int) time(0)), distribution(0, 1) {
         matrix Q(qs.length(), vec(2, 0));
         for (unsigned int i = 0; i < qs.length(); i++) {
             if (qs.at(i) == '0') Q[i][0] = 1;
@@ -28,7 +38,7 @@ struct qcs {
     Output:
         -qcs struct.
     */
-    qcs(matrix Q) {
+    qcs(matrix Q) : generator((unsigned int) time(0)), distribution(0, 1) {
         setupQubits(Q);
     }
 
@@ -345,6 +355,33 @@ struct qcs {
         useOracles(idxs, CRm(phi));
     }
 
+    void CR(vector<unsigned int> idxs) {
+        useOracles(idxs, CRm(0));
+    }
+
+    void CR(unsigned int i, unsigned int j, double phi) {
+        if (j-i == 1) CR(i, phi);
+        else if (i < n-1) {
+            SWP(j, i+1);
+            CR(i, phi);
+            SWP(j, i+1);
+        } else if (j > 0) {
+            SWP(i, j-1);
+            CR(j-1, phi);
+            SWP(i, j-1);
+        } else {
+            SWP(0);
+            SWP(0, i);
+            CR(0, phi);
+            SWP(0, i);
+            SWP(0);
+        }
+    }
+
+    void CR(unsigned int i, unsigned int j) {
+        CR(i, j, 0);
+    }
+
     /*
     Use gate CCX (Toffoli / CCNOT // CCX) on specified qubit.
 
@@ -360,6 +397,145 @@ struct qcs {
         useOracles(idxs, CCXm);
     }
 
+    /*
+    Gathers the probabilities of all combinations of desired qubits given by indices.
+
+    Input:
+        -vector<unsigned int> idxs: a vector of indices of qubits to be taken into account.
+            DEFAULT: If empty (or no) vector is given, all qubits are added.
+    
+    Output:
+        -vector<double> probabilities: an ordered vector of probabilities of combinations
+            of qubits (given by idxs) states.
+    */
+    vector<double> getProbabilities(vector<unsigned int> idxs) {
+        vector<double> probabilities(1 << idxs.size(), 0);
+        unsigned int x;
+        unsigned int idx;
+        for (unsigned int i = 0; i < qubits.size(); i++) {
+            idx = 0;
+            for (unsigned int j = 0; j < idxs.size(); j++) {
+                // Create idx by finding idxs[j] value (0 or 1) in binary i
+                // and then place it in the appropriate spot in idx,
+                // which points to a value in probabilities
+                idx += ((i >> (n - idxs[j] - 1)) & 1) << (idxs.size()-j-1);
+            }
+            probabilities[idx] += norm(qubits[i]);
+        }
+        return probabilities;
+    }
+
+    vector<double> getProbabilities() {
+        vector<unsigned int> idxs(n, 0);
+        for (unsigned int i = 1; i < n; i++) {
+            idxs[i] = i;
+        }
+        return getProbabilities(idxs);
+    }
+
+    /*
+    Measures desired qubits. This action is non-reversible, since measuring
+        a qubit(s) is invasive, meaning the process transforms measured qubit(s)
+        into either |0> or |1> state.
+
+    Input:
+        -vector<unsigned int> idxs: a vector of indices of qubits to be measured.
+            DEFAULT: If empty (or no) vector is given, all qubits are measured.
+    
+    Output:
+        -string measuredString: a string of 0s and 1s, where for any i in idxs,
+            the value measuredString[i] shows that qubit[idxs[i]] is either
+            |0> (if measuredString[i] is 0) or |1> (else).
+    */
+    string measure(vector<unsigned int> idxs) {
+        // No args: add all qubits
+        if (idxs.empty()) {
+            idxs.resize(n, 0);
+            for (unsigned int i = 1; i < n; i++) {
+                idxs[i] = i;
+            }
+        }
+
+        vector<double> probabilities = getProbabilities(idxs);
+
+        // Generate a random value and pick appropriate index
+        double val = distribution(generator);
+        double p = 0;
+        int randIdx = -1;
+        for (unsigned int i = 0; i < probabilities.size() - 1; i++) {
+            p += probabilities[i];
+            if (val <= p) {
+                randIdx = i;
+                break;
+            }
+        }
+        if (randIdx < 0) randIdx = probabilities.size()-1;
+
+        // We now measured the value of desired qubits.
+        // Now update the variable `qubits` variable to reflect
+        // the invasion of reading qubits.
+        // We do this by going through qubits and setting the probability
+        // to 0 if that arrangement does not fit the measurements.
+        // If it does fit, add the norm (probability) to common counter.
+        int idx;
+        double qnorm = 0;
+        for (unsigned int i = 0; i < qubits.size(); i++) {
+            // Extract the same form as `randIdx` from i.
+            // Similar to `getProbabilities` method.
+            idx = 0;
+            for (unsigned int j = 0; j < idxs.size(); j++) {
+                idx += ((i >> (n - idxs[j] - 1)) & 1) << (idxs.size()-j-1);
+            }
+            // cout << idx << '\n';
+            if (idx != randIdx) qubits[i] = 0;
+            else qnorm += norm(qubits[i]);
+        }
+
+        // Divide all values by the square root of qnorm.
+        // This updates the states of qubits based on the measurements.
+        double sqnorm = sqrt(qnorm);
+        for (unsigned int i = 0; i < qubits.size(); i++) {
+            qubits[i] /= sqnorm;
+        }
+
+        string measuredString = intToString(randIdx, idxs.size());
+
+        cout << "Measured qubits: " << measuredString << '\n';
+
+        return measuredString;
+    }
+
+    string measure() {
+        return measure({});
+    }
+
+    string measure(unsigned int idx) {
+        vector<unsigned int> idxs = {idx};
+        return measure(idxs);
+    }
+
+    /*
+    Prints out possible qubit positions (with probability > 0)
+        and their correspoding probabilities.
+
+    Input:
+        -double err (default 1e-16): the probability below which a position
+            is considered to have probability of 0 and is not displayed.
+    */
+    void results(vector<unsigned int> idxs = {}, double err = 1e-16) {
+        // No args: add all qubits
+        if (idxs.empty()) {
+            idxs.resize(n, 0);
+            for (unsigned int i = 1; i < n; i++) {
+                idxs[i] = i;
+            }
+        }
+        vector<double> probabilities = getProbabilities(idxs);
+        for (unsigned int i = 0; i < probabilities.size(); i++) {
+            if (probabilities[i] < err) continue;
+            cout << intToString(i) << ' ' << probabilities[i] << '\n';
+        }
+    }
 
     
 };

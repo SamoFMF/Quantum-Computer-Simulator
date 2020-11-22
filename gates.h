@@ -35,7 +35,7 @@ matrix Rm(double phi);
 matrix CRm(double phi);
 
 // SWAP Quantum Logic Gates
-const matrix SWPm = {{1,0,0,0},{0,0,1,0},{0,1,0,0},{0,0,0,0}}; // Matrix to SWAP 1st and 2nd qubit
+const matrix SWPm = {{1,0,0,0},{0,0,1,0},{0,1,0,0},{0,0,0,1}}; // Matrix to SWAP 1st and 2nd qubit
 const matrix SWP2m = {{1,0,0,0,0,0,0,0}, // Matrix to SWAP 1st and 3rd qubit
                         {0,0,0,0,1,0,0,0},
                         {0,0,1,0,0,0,0,0},
