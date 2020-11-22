@@ -105,8 +105,9 @@ const matrix CCXm = {{1,0,0,0,0,0,0,0},
                         {0,0,0,0,0,0,0,1,0}};
 
 
-// Quantum Fourier Transform (QFT)
+// Quantum Fourier Transform (QFT) and inverse
 matrix QFTm(unsigned int n);
+matrix QFTim(unsigned int n);
 
 
 

@@ -32,6 +32,27 @@ matrix QFTm(unsigned int n) {
     const double sqrtNr = 1.0 / sqrt(N);
     matrix M(N, vec(N, sqrtNr));
     complex<double> val;
+    const complex<double> fact = -2*E_PI/N * 1i;
+    for (unsigned int i = 1; i < N; i++) {
+        for (unsigned int j = i+1; j < N; j++) {
+            val = exp(fact * (double)i * (double)j);
+            val *= sqrtNr;
+            M[i][j] = val;
+            M[j][i] = val;
+        }
+        val = exp(fact * (double)i * (double)i);
+        M[i][i] = val * sqrtNr;
+    }
+    return M;
+}
+
+// QFT inverse
+matrix QFTim(unsigned int n) {
+    unsigned int N = 1 << n;
+
+    const double sqrtNr = 1.0 / sqrt(N);
+    matrix M(N, vec(N, sqrtNr));
+    complex<double> val;
     const complex<double> fact = 2*E_PI/N * 1i;
     for (unsigned int i = 1; i < N; i++) {
         for (unsigned int j = i+1; j < N; j++) {

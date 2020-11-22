@@ -417,6 +417,17 @@ struct qcs {
     }
 
     /*
+    Use Quantum Fourier Inverse Transform (QFTi) of desired size on specified qubit.
+
+    Input:
+        -unsigned int idx: index of qubit on which to use CCX,
+        -unsigned int size: number of qubits on which QFT operates.
+    */
+    void QFTi(unsigned int idx = 0, unsigned int size = 1) {
+        useOracle(idx, QFTim(size));
+    }
+
+    /*
     Gathers the probabilities of all combinations of desired qubits given by indices.
 
     Input:
