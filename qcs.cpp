@@ -13,6 +13,7 @@
 struct qcs {
     vec qubits; // Complex amplitudes of all qubits
     unsigned int n; // Number of qubits
+    vector<bool> cr; // Classical register (register of booleans)
 
     // Create random generator and distribution
     mt19937_64 generator; // This will be initialized based on current time
@@ -386,8 +387,7 @@ struct qcs {
     Use gate CCX (Toffoli / CCNOT // CCX) on specified qubit.
 
     Input:
-        -unsigned int idx: index of qubit on which to use CCX,
-        -double phi: phase.
+        -unsigned int idx: index of qubit on which to use CCX.
     */
     void CCX(unsigned int idx = 0) {
         useOracle(idx, CCXm);
@@ -395,6 +395,17 @@ struct qcs {
 
     void CCX(vector<unsigned int> idxs) {
         useOracles(idxs, CCXm);
+    }
+
+    /*
+    Use Quantum Fourier Transform (QFT) of desired size on specified qubit.
+
+    Input:
+        -unsigned int idx: index of qubit on which to use CCX,
+        -unsigned int size: number of qubits on which QFT operates.
+    */
+    void QFT(unsigned int idx = 0, unsigned int size = 1) {
+        useOracle(idx, QFTm(size));
     }
 
     /*
@@ -486,7 +497,6 @@ struct qcs {
             for (unsigned int j = 0; j < idxs.size(); j++) {
                 idx += ((i >> (n - idxs[j] - 1)) & 1) << (idxs.size()-j-1);
             }
-            // cout << idx << '\n';
             if (idx != randIdx) qubits[i] = 0;
             else qnorm += norm(qubits[i]);
         }
@@ -514,6 +524,39 @@ struct qcs {
         return measure(idxs);
     }
 
+    bool measureAndSave(unsigned int idx = 0, int idxReg = -1) {
+        vector<double> probabilities = getProbabilities({idx});
+        double val = distribution(generator);
+        int randIdx = val<=probabilities[0] ? 0 : 1;
+
+        int idx1;
+        double qnorm = 0;
+        for (unsigned int i = 0; i < qubits.size(); i++) {
+            // Extract the same form as `randIdx` from i.
+            // Similar to `getProbabilities` method.
+            if (((i >> (n-idx-1)) & 1) ^ randIdx) qubits[i] = 0;
+            else qnorm += norm(qubits[i]);
+        }
+
+        double sqnorm = sqrt(qnorm);
+        for (unsigned int i = 0; i < qubits.size(); i++) {
+            qubits[i] /= sqnorm;
+        }
+
+        cout << "Qubit " << idx << " measured as: " << randIdx << '\n';
+
+        // Save randIdx into classical register at index idxReg
+        if (idxReg < 0 || idxReg >= cr.size()) {
+            // Save measurement at the end of the register (new slot)
+            cr.push_back(randIdx);
+        } else {
+            // Register already exists, save measurement into it
+            cr[idxReg] = randIdx;
+        }
+
+        return randIdx;
+    }
+
     /*
     Prints out possible qubit positions (with probability > 0)
         and their correspoding probabilities.
@@ -531,10 +574,21 @@ struct qcs {
             }
         }
         vector<double> probabilities = getProbabilities(idxs);
+        cout << "\nState : Probability\n";
         for (unsigned int i = 0; i < probabilities.size(); i++) {
             if (probabilities[i] < err) continue;
-            cout << intToString(i) << ' ' << probabilities[i] << '\n';
+            cout << intToString(i, n) << " : " << probabilities[i] << '\n';
         }
+        cout << '\n';
+    }
+
+
+    //////////////////////////////////////////////////////
+    //////////////// CLASSICAL OPERATIONS ////////////////
+    //////////////////////////////////////////////////////
+
+    bool getBoolCR(unsigned int idx) {
+        return (idx < 0 || idx >= cr.size()) ? cr.back() : cr[idx];
     }
 
     
