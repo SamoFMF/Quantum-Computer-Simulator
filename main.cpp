@@ -130,13 +130,14 @@ int main() {
     cout << "QUANTUM TELEPORTATION\n";
     quantumTeleportationCircuit();
 
+    cout << "\n----------------------\n\n" << "DEUTSCH-JOZSA ALGORITHM\n";
+    algorithmDeutschJozsa();
+
     cout << "----------------------\n\n" << "SUPERDENSE CODING\n";
+    cout << "Type the message to be sent: ";
     string msg;
     cin >> msg;
     superdenseCoding(msg);
-
-    cout << "\n----------------------\n\n" << "DEUTSCH-JOZSA ALGORITHM\n";
-    algorithmDeutschJozsa();
 
     return 0;
 }
