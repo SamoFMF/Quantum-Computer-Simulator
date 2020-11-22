@@ -241,6 +241,14 @@ struct qcs {
         useOracles(idxs, Hm);
     }
 
+    void H_all() {
+        vector<unsigned int> idxs(n, 0);
+        for (unsigned int i = 1; i < n; i++) {
+            idxs[i] = i;
+        }
+        H(idxs);
+    }
+
     /*
     Use gate Y (Pauli-Y) on specified qubit.
 
@@ -516,7 +524,7 @@ struct qcs {
     }
 
     string measure() {
-        return measure({});
+        return measure(vector<unsigned int>(0));
     }
 
     string measure(unsigned int idx) {

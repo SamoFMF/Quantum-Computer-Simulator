@@ -45,7 +45,3 @@ matrix QFTm(unsigned int n) {
     }
     return M;
 }
-
-const matrix QFTm2 = QFTm(2);
-const matrix QFTm4 = QFTm(4);
-const matrix QFTm8 = QFTm(8);
