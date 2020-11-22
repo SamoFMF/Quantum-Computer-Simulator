@@ -3,6 +3,7 @@
 
 #include "matrix.h"
 #include <math.h>
+#include "utility.h"
 
 // Quantum logic gates in matrix forms
 
@@ -23,7 +24,7 @@ const matrix Hm = {{hf,hf},{hf,-hf}};
 const matrix Ym = {{0,-1i},{1i,0}};
 
 // Pauli-Z: rotation around Z-axis by pi radians
-const matrix Zm = {{1,0},{0,-1i}};
+const matrix Zm = {{1,0},{0,-1}};
 
 // SQX: Square root of NOT gate
 const matrix SQXm = {{1.0+1i,1.0-1i},{1.0-1i,1.0+1i}};
@@ -102,7 +103,11 @@ const matrix CCXm = {{1,0,0,0,0,0,0,0},
                         {0,0,0,0,0,0,0,1,0}};
 
 
-
+// Quantum Fourier Transform (QFT)
+matrix QFTm(unsigned int n);
+extern const matrix QFTm2;
+extern const matrix QFTm4;
+extern const matrix QFTm8;
 
 
 

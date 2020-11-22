@@ -2,6 +2,10 @@
 #include "qcs.cpp"
 #include <iostream>
 #include <math.h>
+#include <string>
+
+// TODO - remove
+#include <time.h>
 
 void interactiveBuilder() {
     // TODO - being developed
@@ -30,8 +34,8 @@ void interactiveBuilder() {
 /*
 Check online for quantum teleportation for an explanation.
 */
-qcs quantumTeleportationCircuit(vec psi = {}) {
-    if (psi.size() == 0) psi = {0.167060265149910+0.428660680349339i,0.703361116340482 + 0.541870860031018i};
+void quantumTeleportationCircuit(vec psi = {}) {
+    if (psi.empty()) psi = {0.167060265149910+0.428660680349339i,0.703361116340482 + 0.541870860031018i};
     
     matrix M = {psi,{1,0},{1,0}};
     qcs q = qcs(M); // Initialize qcs with qubits |psi>, |0>, and |0>
@@ -56,9 +60,63 @@ qcs quantumTeleportationCircuit(vec psi = {}) {
 
     // End states
     q.results();
+}
 
+void superdenseCoding(string msg = "00") {
+    qcs q = qcs("00");
 
-    return q;
+    // Create Bell state
+    q.H(0);
+    q.CX(0);
+
+    // // Alice encodes message
+    if (msg.at(0) == '1') q.Z(0);
+    if (msg.at(1) == '1') q.X(0);
+
+    // Bob decodes message
+    q.CX(0);
+    q.H(0);
+
+    q.measure({0,1});
+}
+
+void algorithmDeutschJozsa(matrix Uf = {}) {
+    if (Uf.empty()) { // Use default oracle
+        Uf = {{1,0,0,0,0,0,0,0}, // Balanced function
+                {0,1,0,0,0,0,0,0},
+                {0,0,0,1,0,0,0,0},
+                {0,0,1,0,0,0,0,0},
+                {0,0,0,0,0,1,0,0},
+                {0,0,0,0,1,0,0,0},
+                {0,0,0,0,0,0,1,0},
+                {0,0,0,0,0,0,0,1}};
+    }
+
+    // Create qcs of appropriate size - based on size of Uf
+    int n = 0; // Number of qubits
+    int size = Uf.size();
+    while (size > 1) {
+        n++;
+        size >>= 1;
+    }
+    qcs q = qcs(string(n-1, '0').append("1"));
+
+    // Apply Hadamards gate on every qubit
+    vector<unsigned int> idxs(n,0);
+    for (unsigned int i = 1; i < n; i++) {
+        idxs[i] = i;
+    }
+    q.H(idxs);
+
+    // Use oracle
+    q.useOracle(0, Uf);
+
+    // Apply Hadamards gate to every qubit except the last one
+    idxs.pop_back();
+    q.H(idxs);
+
+    // Measure every qubit except the last one
+    q.measure(idxs);
 }
 
 int main() {
@@ -87,5 +145,40 @@ int main() {
     // q.measureAndSave(1, 1);
     // q.results();
 
+    // QTC
+    cout << "QUANTUM TELEPORTATION\n";
     quantumTeleportationCircuit();
+
+    cout << "----------------------\n\n" << "SUPERDENSE CODING\n";
+    superdenseCoding("01");
+
+    cout << "----------------------\n\n" << "DEUTSCH-JOZSA ALGORITHM\n";
+    algorithmDeutschJozsa();
+
+    // cout << "----------------------\n\n" << "QFT\n";
+    // int n = 13;
+    // clock_t start,end;
+    // // matrix M = QFTm(n);
+    // qcs q = qcs(string(n,'0'));
+    // start = clock();
+    // matrix M = QFTm(1);
+    // q.useOracles({0,1,2,3,4,5,6,7,8,9,10,11}, Hm);
+    // end = clock();
+    // // print(q.qubits);
+    // // q.results();
+
+    // cout << ((float)(end-start))*1000/(CLOCKS_PER_SEC) << ' ';
+
+    // qcs q1 = qcs(string(n,'0'));
+    // start = clock();
+    // matrix M1 = QFTm(n);
+    // q1.useOracle(0, M1);
+    // end = clock();
+
+    // cout << ((float)(end-start))*1000/(CLOCKS_PER_SEC);
+
+    print(QFTm2);
+    print(multiply(QFTm2, {1,0,0,0}));
+
+    return 0;
 }

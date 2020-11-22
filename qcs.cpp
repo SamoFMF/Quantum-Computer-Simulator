@@ -387,8 +387,7 @@ struct qcs {
     Use gate CCX (Toffoli / CCNOT // CCX) on specified qubit.
 
     Input:
-        -unsigned int idx: index of qubit on which to use CCX,
-        -double phi: phase.
+        -unsigned int idx: index of qubit on which to use CCX.
     */
     void CCX(unsigned int idx = 0) {
         useOracle(idx, CCXm);
@@ -396,6 +395,17 @@ struct qcs {
 
     void CCX(vector<unsigned int> idxs) {
         useOracles(idxs, CCXm);
+    }
+
+    /*
+    Use Quantum Fourier Transform (QFT) of desired size on specified qubit.
+
+    Input:
+        -unsigned int idx: index of qubit on which to use CCX,
+        -unsigned int size: number of qubits on which QFT operates.
+    */
+    void QFT(unsigned int idx = 0, unsigned int size = 1) {
+        useOracle(idx, QFTm(size));
     }
 
     /*
