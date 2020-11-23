@@ -253,7 +253,9 @@ struct qcs {
         if(i+1 == j){
             view.swap(i);
         }else{
-            view.swapN(i, j);
+            if(i != j){
+                view.swapN(i, j);
+            }
         }
     }
 

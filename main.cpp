@@ -185,6 +185,6 @@ int main() {
     superdenseCoding(msg);
 
     //displayCircuitTEST();
-    
+
     return 0;
 }
