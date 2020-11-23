@@ -95,7 +95,7 @@ int circuitView::smallBox(string textInside, vector<unsigned int> boxLocations){
 }
 
 // 1st control, 2nd box
-int circuitView::smallControlledBox(string textInside, unsigned int boxLocation){
+int circuitView::smallControlledBox(string textInside, unsigned int boxLocation, bool secondControl){
     if(off){ return 0;}
     int c_line = textInside.length()/2;
 
@@ -120,34 +120,56 @@ int circuitView::smallControlledBox(string textInside, unsigned int boxLocation)
     circuit_out[boxLocation*3+0] += "    ";
     circuit_out[boxLocation*3+1] += "____";
     circuit_out[boxLocation*3+2] += "    ";
-
-    vector<unsigned int> boxLocations = {boxLocation + 1};
-
-    for (int i = 0; i < boxLocations.size(); i++)
-    {
-        int x = boxLocations[i];
-        circuit_out[x*3+0] += "   _";
-        for (int m = 0; m < textInside.length(); m++)
+    
+    
+    if(secondControl){
+        boxLocation++;
+        circuit_out[boxLocation*3+0] += "    ";
+        circuit_out[boxLocation*3+1] += "____";
+        circuit_out[boxLocation*3+2] += "    ";
+        for (int k = 0; k < c_line; k++)
         {
-            if(m == c_line){
-                circuit_out[x*3+0] += "|";
-            }else{
-                circuit_out[x*3+0] += "_";
-            }
+            circuit_out[boxLocation*3+0] += " ";
+            circuit_out[boxLocation*3+1] += "_";
+            circuit_out[boxLocation*3+2] += " ";
         }
-        circuit_out[x*3+0] += "_   ";
-        
-        circuit_out[x*3+1] += "__| ";
-        circuit_out[x*3+1] += textInside;
-        circuit_out[x*3+1] += " |__";
-        
-        circuit_out[x*3+2] += "  |_";
-        for (int m = 0; m < textInside.length(); m++)
+        circuit_out[boxLocation*3+0] += "|";
+        circuit_out[boxLocation*3+1] += ".";
+        circuit_out[boxLocation*3+2] += "|";
+        for (int k = 0; k < c_line; k++)
         {
-            circuit_out[x*3+2] += "_";
+            circuit_out[boxLocation*3+0] += " ";
+            circuit_out[boxLocation*3+1] += "_";
+            circuit_out[boxLocation*3+2] += " ";
         }
-        circuit_out[x*3+2] += "_|  ";
+        circuit_out[boxLocation*3+0] += "    ";
+        circuit_out[boxLocation*3+1] += "____";
+        circuit_out[boxLocation*3+2] += "    ";
     }
+
+    boxLocation++;
+    circuit_out[boxLocation*3+0] += "   _";
+    for (int m = 0; m < textInside.length(); m++)
+    {
+        if(m == c_line){
+            circuit_out[boxLocation*3+0] += "|";
+        }else{
+            circuit_out[boxLocation*3+0] += "_";
+        }
+    }
+    circuit_out[boxLocation*3+0] += "_   ";
+    
+    circuit_out[boxLocation*3+1] += "__| ";
+    circuit_out[boxLocation*3+1] += textInside;
+    circuit_out[boxLocation*3+1] += " |__";
+    
+    circuit_out[boxLocation*3+2] += "  |_";
+    for (int m = 0; m < textInside.length(); m++)
+    {
+        circuit_out[boxLocation*3+2] += "_";
+    }
+    circuit_out[boxLocation*3+2] += "_|  ";
+    
     fillEmpty();
     
     return 8 + textInside.length();
@@ -199,7 +221,7 @@ int circuitView::smallInvControlledBox(string textInside, unsigned int boxLocati
 }
 
 
-void circuitView::measureAndSave(unsigned int boxLocation, unsigned int regLocation){
+void circuitView::boxConnectedToReg(unsigned int boxLocation, unsigned int regLocation, string boxName){
     if(off){ return;}
     int old_n_reg = n_reg;
     if(n_reg < regLocation + 1){
@@ -222,7 +244,8 @@ void circuitView::measureAndSave(unsigned int boxLocation, unsigned int regLocat
     fillEmpty();
 
     circuit_out[boxLocation*3+0] += "   ___   ";
-    circuit_out[boxLocation*3+1] += "__| M |__"; // _/
+    //circuit_out[boxLocation*3+1] += "__| M |__"; // _/
+    circuit_out[boxLocation*3+1] += "__|"+ boxName +"|__";
     circuit_out[boxLocation*3+2] += "  |___|  ";
 
     for (int i = boxLocation + 1; i < qubits; i++)
@@ -243,6 +266,22 @@ void circuitView::measureAndSave(unsigned int boxLocation, unsigned int regLocat
     circuit_out[qubits*3+1+regLocation*3] += "====*====";
     circuit_out[qubits*3+2+regLocation*3] += "         ";
 
+    fillEmpty();
+}
+
+void circuitView::swapN(unsigned int qubit1, unsigned int qubit2){
+    circuit_out[qubit1*3+0] += "       ";
+    circuit_out[qubit1*3+1] += "_______";
+    circuit_out[qubit1*3+2] += "   |   ";
+    for (int i = qubit1 + 1; i < qubit2; i++)
+    {
+        circuit_out[i*3+0] += "   |   ";
+        circuit_out[i*3+1] += "___|___";
+        circuit_out[i*3+2] += "   |   ";
+    }
+    circuit_out[qubit2*3+0] += "   |   ";
+    circuit_out[qubit2*3+1] += "___|___";
+    circuit_out[qubit2*3+2] += "       ";
     fillEmpty();
 }
 

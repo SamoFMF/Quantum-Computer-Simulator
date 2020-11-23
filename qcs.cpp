@@ -47,10 +47,19 @@ struct qcs {
     */
     qcs(matrix Q) : generator((unsigned int) time(0)), distribution(0, 1) {
         setupQubits(Q);
-        string input = " ";
-        for (int i = 0; i < Q.size()-1; i++)
+        string input = "";
+        for (int i = 0; i < Q.size(); i++)
         {
-            input += " ";
+            
+            if(Q[i][1].real() < 1.01 && Q[i][1].real() > 0.99){
+                input += "1";
+            }
+            else if(Q[i][1].real() < 0.01 && Q[i][1].real() > -0.01){
+                input += "0";
+            }
+            else{
+                input += "X";
+            }
         }
         view.begin(input);
     }
@@ -122,12 +131,12 @@ struct qcs {
     void Oracles(vector<unsigned int> idxs, const matrix Oracle){
         useOracles(idxs, vector<matrix>(idxs.size(), Oracle));
         
-        if(round(sqrt(Oracle.size())) == 2){
+        if(log2(Oracle.size()) == 2){
             view.smallBox("Oracle", idxs);
         }else{
             for (int i = 0; i < idxs.size(); i++)
             {
-                view.bigBox("Oracle",round(sqrt(Oracle.size())), idxs[i]);   
+                view.bigBox("Oracle",log2(Oracle.size()), idxs[i]);   
             }
         }
     }
@@ -162,7 +171,6 @@ struct qcs {
     */
     void SWP(unsigned int idx = 0) {
         useOracle(idx, SWPm);
-        view.swap(idx);
     }
 
     void SWP(vector<unsigned int> idxs) {
@@ -241,6 +249,12 @@ struct qcs {
             SWP8(idx8.back());
             idx8.pop_back();
         }
+
+        if(i+1 == j){
+            view.swap(i);
+        }else{
+            view.swapN(i, j);
+        }
     }
 
     /*
@@ -257,6 +271,23 @@ struct qcs {
     void X(vector<unsigned int> idxs) {
         useOracles(idxs, Xm);
         view.smallBox("X",idxs);
+    }
+
+    /*
+    Input:
+        First arg is qubit loaction and second register location
+    */
+    void boolCR_X(unsigned int qubitLocation, unsigned int regLocation){
+        if (getBoolCR(regLocation)) useOracle(qubitLocation, Xm);
+        view.boxConnectedToReg(qubitLocation, regLocation, " X ");
+    }
+    void boolCR_Y(unsigned int qubitLocation, unsigned int regLocation){
+        if (getBoolCR(regLocation)) useOracle(qubitLocation, Ym);
+        view.boxConnectedToReg(qubitLocation, regLocation, " Y ");
+    }
+    void boolCR_Z(unsigned int qubitLocation, unsigned int regLocation){
+        if (getBoolCR(regLocation)) useOracle(qubitLocation, Zm);
+        view.boxConnectedToReg(qubitLocation, regLocation, " Z ");
     }
 
     /*
@@ -455,33 +486,39 @@ struct qcs {
     */
     void CCX(unsigned int idx = 0) {
         useOracle(idx, CCXm);
+        view.smallControlledBox("Toffoli", idx, true);
     }
 
     void CCX(vector<unsigned int> idxs) {
         useOracles(idxs, CCXm);
+        for (int i = 0; i < idxs.size(); i++)
+        {
+            view.smallControlledBox("Toffoli", idxs[i], true);
+        }
     }
 
     /*
     Use Quantum Fourier Transform (QFT) of desired size on specified qubit.
 
     Input:
-        -unsigned int idx: index of qubit on which to use CCX,
+        -unsigned int idx: index of first qubit,
         -unsigned int size: number of qubits on which QFT operates.
     */
     void QFT(unsigned int idx = 0, unsigned int size = 1) {
         useOracle(idx, QFTm(size));
-
+        view.bigBox("QFT", size, idx);
     }
 
     /*
     Use Quantum Fourier Inverse Transform (QFTi) of desired size on specified qubit.
 
     Input:
-        -unsigned int idx: index of qubit on which to use CCX,
+        -unsigned int idx: index of first qubit,
         -unsigned int size: number of qubits on which QFT operates.
     */
     void QFTi(unsigned int idx = 0, unsigned int size = 1) {
         useOracle(idx, QFTim(size));
+        view.bigBox("QFTi", size, idx);
     }
 
     /*
@@ -644,7 +681,7 @@ struct qcs {
             // Register already exists, save measurement into it
             cr[idxReg] = randIdx;
         }
-        view.measureAndSave(idx,idxReg);
+        view.boxConnectedToReg(idx,idxReg);
         return randIdx;
     }
 

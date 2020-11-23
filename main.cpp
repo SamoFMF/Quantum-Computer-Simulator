@@ -56,8 +56,11 @@ void quantumTeleportationCircuit(vec psi = {}) {
     q.measureAndSave(0, 0);
     q.measureAndSave(1, 1);
 
-    if (q.getBoolCR(1)) q.X(2);
-    if (q.getBoolCR(0)) q.Z(2);
+    q.boolCR_X(2,1);
+    q.boolCR_Z(2,0);
+
+    //if (q.getBoolCR(1)) q.X(2);
+    //if (q.getBoolCR(0)) q.Z(2);
 
     // End states
     q.resultsEnd();
@@ -127,35 +130,44 @@ void algorithmDeutschJozsa(matrix Uf = {}) {
     q.measureEnd(idxs);
 }
 void displayCircuitTEST(){
+    cout << "\n";
     circuitView view;
-    view.begin("001");
+    view.begin("0010");
         
     vector<unsigned int> a1 = {0,2};
-    view.smallBox("nekiX", a1);
+    view.smallBox("Z", a1);
     
     vector<unsigned int> a2 = {2};
-    view.smallBox("ETH", a2);
+    view.smallBox("X", a2);
 
     vector<unsigned int> a3 = {0,1,2};
-    view.smallBox("1233456", a3);
+    view.smallBox("1", a3);
 
-    view.bigBox("BTC",3,0);
+    view.bigBox("X",3,0);
 
     view.swap(0);
 
     view.swap(1);
 
     view.smallControlledBox("X", 0);
-    view.smallControlledBox("CXX", 0);
-    view.smallControlledBox("CXX34", 0);
+    view.smallControlledBox("CX", 0);
+    view.smallControlledBox("O", 0);
      
-    view.measureAndSave(1,0);
-    view.measureAndSave(2,0);
-    view.measureAndSave(0,4);
-    view.measureAndSave(1,2);
+    view.boxConnectedToReg(1,0);
+    view.boxConnectedToReg(2,0);
+    view.boxConnectedToReg(0,4);
+    view.boxConnectedToReg(1,2);
 
-    view.smallInvControlledBox("CVC", 1);
-    view.smallInvControlledBox("CV", 0);
+    view.smallInvControlledBox("Z", 1);
+    view.smallInvControlledBox("Y", 0);
+
+    view.swapN(0,2);
+    view.swapN(0,1);
+    view.swapN(1,2);
+    view.swapN(0,3);
+
+    view.smallControlledBox("Toffoli", 0,true);
+    view.smallControlledBox("Toffoli", 1,true);
     view.displayCircuit();
 }
 int main() {
@@ -172,5 +184,7 @@ int main() {
     cin >> msg;
     superdenseCoding(msg);
 
+    //displayCircuitTEST();
+    
     return 0;
 }
