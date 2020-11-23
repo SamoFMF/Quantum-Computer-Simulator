@@ -177,3 +177,9 @@ qc.measureAndSave(0, 1); // Izmeri qubit 0 in njegovo vrednost shrani v register
 
 # Primeri implementiranih vezij
 Implementirana so že vezja za kvantno tuneliranje `quantumTeleportationCircuit()`, Deutsch-Jozsca algoritem `algorithmDeutschJozsa` ter "superdense" kodiranje `superdenseCoding`. Pri slednjem lahko podamo poljubno velik niz (v mejah zmogljivosti računalnika - nad 10 qubitov zna povzročati že težave), ki ga dobimo kot rezultat tudi na koncu vezja.
+
+![alt text](https://github.com/SamoFMF/Quantum-Computer-Simulator/blob/main/QuantumTeleportation.png?raw=true)
+![alt text](https://github.com/SamoFMF/Quantum-Computer-Simulator/blob/main/DeutschJozsaAlgorithm.png?raw=true)
+![alt text](https://github.com/SamoFMF/Quantum-Computer-Simulator/blob/main/SuperdenseCoding.png?raw=true)
+
+
