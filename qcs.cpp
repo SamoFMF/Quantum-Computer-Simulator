@@ -206,6 +206,14 @@ struct qcs {
             j = temp;
         }
 
+        if(i+1 == j){
+            view.swap(i);
+        }else{
+            if(i != j){
+                view.swapN(i, j);
+            }
+        }
+
         // Use SWP8m until possible (j-i >= 8)
         vector<unsigned int> idx8;
         while (j-i >= 8) {
@@ -250,13 +258,7 @@ struct qcs {
             idx8.pop_back();
         }
 
-        if(i+1 == j){
-            view.swap(i);
-        }else{
-            if(i != j){
-                view.swapN(i, j);
-            }
-        }
+        
     }
 
     /*
