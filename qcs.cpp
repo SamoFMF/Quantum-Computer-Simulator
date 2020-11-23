@@ -252,6 +252,14 @@ struct qcs {
         view.smallBox("H",idxs);
     }
 
+    void H_all() {
+        vector<unsigned int> idxs(n, 0);
+        for (unsigned int i = 1; i < n; i++) {
+            idxs[i] = i;
+        }
+        H(idxs);
+    }
+
     /*
     Use gate Y (Pauli-Y) on specified qubit.
 
@@ -447,6 +455,17 @@ struct qcs {
     }
 
     /*
+    Use Quantum Fourier Inverse Transform (QFTi) of desired size on specified qubit.
+
+    Input:
+        -unsigned int idx: index of qubit on which to use CCX,
+        -unsigned int size: number of qubits on which QFT operates.
+    */
+    void QFTi(unsigned int idx = 0, unsigned int size = 1) {
+        useOracle(idx, QFTim(size));
+    }
+
+    /*
     Gathers the probabilities of all combinations of desired qubits given by indices.
 
     Input:
@@ -554,7 +573,7 @@ struct qcs {
     }
 
     string measure() {
-        return measure({});
+        return measure(vector<unsigned int>(0));
     }
 
     string measure(unsigned int idx) {

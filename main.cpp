@@ -64,21 +64,27 @@ void quantumTeleportationCircuit(vec psi = {}) {
 }
 
 void superdenseCoding(string msg = "00") {
-    qcs q = qcs("00");
+    qcs q = qcs(string(msg.length(), '0'));
 
     // Create Bell state
-    q.H(0);
-    q.CX(0);
+    for (int i = 0; i < msg.length()-1; i++) {
+        q.H(i);
+        q.CX(i, msg.length()-1);
+    }
 
     // // Alice encodes message
-    if (msg.at(0) == '1') q.Z(0);
-    if (msg.at(1) == '1') q.X(0);
+    for (unsigned int i = 0; i < msg.length()-1; i++) {
+        if (msg.at(i) == '1') q.Z(i);
+    }
+    if (msg.at(msg.length()-1) == '1') q.X(0);
 
     // Bob decodes message
-    q.CX(0);
-    q.H(0);
-
-    q.measure({0,1});
+    for (int i = 0; i < msg.length()-1; i++) {
+        q.CX(i, msg.length()-1);
+        q.H(i);
+    }
+    
+    q.measure();
 }
 
 void algorithmDeutschJozsa(matrix Uf = {}) {
@@ -121,41 +127,14 @@ void algorithmDeutschJozsa(matrix Uf = {}) {
 }
 
 int main() {
-    // qcs q = qcs("001");
-    // matrix Uf = {{1,0,0,0,0,0,0,0}, // Balanced function
-    //                 {0,1,0,0,0,0,0,0},
-    //                 {0,0,0,1,0,0,0,0},
-    //                 {0,0,1,0,0,0,0,0},
-    //                 {0,0,0,0,0,1,0,0},
-    //                 {0,0,0,0,1,0,0,0},
-    //                 {0,0,0,0,0,0,1,0},
-    //                 {0,0,0,0,0,0,0,1}};
-    // q.H({0,1,2});
-    // q.useOracle(0, Uf);
-    // q.H({0,1});
-
-    // q.measure({0,2});
-    // q.results();
-    // qcs q = qcs("001");
-    // q.Y(0);
-    // q.H(1);
-    // q.CX(1);
-    // q.CX(0);
-    // q.H(0);
-    // q.measureAndSave(0, 0);
-    // q.measureAndSave(1, 1);
-    // q.results();
-
     // QTC
     /*
     cout << "QUANTUM TELEPORTATION\n";
     quantumTeleportationCircuit();
 
-    cout << "----------------------\n\n" << "SUPERDENSE CODING\n";
-    superdenseCoding("01");
-
-    cout << "----------------------\n\n" << "DEUTSCH-JOZSA ALGORITHM\n";
+    cout << "\n----------------------\n\n" << "DEUTSCH-JOZSA ALGORITHM\n";
     algorithmDeutschJozsa();
+<<<<<<< HEAD
 */
     // cout << "----------------------\n\n" << "QFT\n";
     // int n = 13;
@@ -210,6 +189,14 @@ int main() {
     view.measureBox(0,4);
     view.measureBox(1,2);
     view.displayCircuit();
+=======
+
+    cout << "----------------------\n\n" << "SUPERDENSE CODING\n";
+    cout << "Type the message to be sent: ";
+    string msg;
+    cin >> msg;
+    superdenseCoding(msg);
+>>>>>>> a106342f6d2455290ffe2efc912de21ee542409d
 
     return 0;
 }
