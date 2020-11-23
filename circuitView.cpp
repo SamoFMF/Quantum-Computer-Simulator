@@ -6,6 +6,7 @@ circuitView::circuitView(){
 
 }
 void circuitView::begin(string in_qubits){
+    if(off){ return;}
     qubits = in_qubits.length();
     circuit_out = new string[qubits*3];
 
@@ -21,18 +22,19 @@ void circuitView::begin(string in_qubits){
 }
 
 void circuitView::displayCircuit(){
+    if(off){ return;}
     for (int i = 0; i < (3*qubits) + (3*n_reg); i++) {
         cout << circuit_out[i]; 
         cout << '+';
         cout << '\n';
     }
     cout << '\n';
-    cout << "_________________DONE_________________";
 }
 
 void circuitView::fillEmpty(){
     // dodaj ravno črto (dodaj nič) kjer ni elementa(funkcije).
     //int lengthMustBe = shema_out[a1[0]].length();
+    if(off){ return;}
     int lengthMustBe = 0;
     for (int m = 0; m < qubits*3; m++)
     {
@@ -65,6 +67,7 @@ void circuitView::fillEmpty(){
 }
 
 int circuitView::smallBox(string textInside, vector<unsigned int> boxLocations){
+    if(off){ return 0;}
     for (int i = 0; i < boxLocations.size(); i++)
     {
         int x = boxLocations[i];
@@ -87,11 +90,13 @@ int circuitView::smallBox(string textInside, vector<unsigned int> boxLocations){
         circuit_out[x*3+2] += "_|  ";
     }
     fillEmpty();
+
     return 8 + textInside.length();
 }
 
 // 1st control, 2nd box
 int circuitView::smallControlledBox(string textInside, unsigned int boxLocation){
+    if(off){ return 0;}
     int c_line = textInside.length()/2;
 
     circuit_out[boxLocation*3+0] += "    ";
@@ -144,10 +149,58 @@ int circuitView::smallControlledBox(string textInside, unsigned int boxLocation)
         circuit_out[x*3+2] += "_|  ";
     }
     fillEmpty();
+    
     return 8 + textInside.length();
 }
 
-void circuitView::measureBox(unsigned int boxLocation, unsigned int regLocation){
+// First box then control.
+int circuitView::smallInvControlledBox(string textInside, unsigned int boxLocation){
+    if(off){ return 0;}
+    int x = boxLocation;
+    circuit_out[x*3+0] += "   _";
+    circuit_out[x*3+2] += "  |_";
+    for (int m = 0; m < textInside.length(); m++)
+    {
+        circuit_out[x*3+0] += "_";
+        circuit_out[x*3+2] += "_";
+    }
+    circuit_out[x*3+0] += "_   ";
+    circuit_out[x*3+2] += "_|  ";
+
+    circuit_out[x*3+1] += "__| ";
+    circuit_out[x*3+1] += textInside;
+    circuit_out[x*3+1] += " |__";
+
+
+    int c_line = textInside.length()/2;
+    x++;
+    circuit_out[x*3+0] += "    ";
+    circuit_out[x*3+1] += "____";
+    for (int k = 0; k < c_line; k++)
+    {
+        circuit_out[x*3+0] += " ";
+        circuit_out[x*3+1] += "_";
+        circuit_out[x*3+2] += " ";
+    }
+    circuit_out[x*3+0] += "|";
+    circuit_out[x*3+1] += "|";
+    for (int k = 0; k < c_line; k++)
+    {
+        circuit_out[x*3+0] += " ";
+        circuit_out[x*3+1] += "_";
+        circuit_out[x*3+2] += " ";
+    }
+    circuit_out[x*3+0] += "    ";
+    circuit_out[x*3+1] += "____";
+    circuit_out[x*3+2] += "         ";
+
+    fillEmpty();
+    return 8 + textInside.length();
+}
+
+
+void circuitView::measureAndSave(unsigned int boxLocation, unsigned int regLocation){
+    if(off){ return;}
     int old_n_reg = n_reg;
     if(n_reg < regLocation + 1){
         n_reg = regLocation + 1;
@@ -169,7 +222,7 @@ void circuitView::measureBox(unsigned int boxLocation, unsigned int regLocation)
     fillEmpty();
 
     circuit_out[boxLocation*3+0] += "   ___   ";
-    circuit_out[boxLocation*3+1] += "__| M |__";
+    circuit_out[boxLocation*3+1] += "__| M |__"; // _/
     circuit_out[boxLocation*3+2] += "  |___|  ";
 
     for (int i = boxLocation + 1; i < qubits; i++)
@@ -196,7 +249,7 @@ void circuitView::measureBox(unsigned int boxLocation, unsigned int regLocation)
 
 int circuitView::bigBox(string textInside, int boxSize, int boxLocation){
     //begin location 
-    
+    if(off){ return 0;}
     circuit_out[boxLocation*3+0] += "   _";
     circuit_out[boxLocation*3+1] += "__| ";
     circuit_out[boxLocation*3+2] += "  | ";
@@ -249,8 +302,9 @@ int circuitView::bigBox(string textInside, int boxSize, int boxLocation){
 
     return 8 + textInside.length();
 }
-
+// swap length 1.
 void circuitView::swap(int location){
+    if(off){ return;}
     circuit_out[location*3+0] += "       ";
     circuit_out[location*3+1] += "__   __";
     circuit_out[location*3+2] += "  \\ /  ";
@@ -259,3 +313,4 @@ void circuitView::swap(int location){
     circuit_out[location*3+5] += "       ";
     fillEmpty();
 }
+// swap length 1>  TODO

@@ -60,7 +60,7 @@ void quantumTeleportationCircuit(vec psi = {}) {
     if (q.getBoolCR(0)) q.Z(2);
 
     // End states
-    q.results();
+    q.resultsEnd();
 }
 
 void superdenseCoding(string msg = "00") {
@@ -84,7 +84,7 @@ void superdenseCoding(string msg = "00") {
         q.H(i);
     }
     
-    q.measure();
+    q.measureEnd();
 }
 
 void algorithmDeutschJozsa(matrix Uf = {}) {
@@ -116,52 +116,17 @@ void algorithmDeutschJozsa(matrix Uf = {}) {
     q.H(idxs);
 
     // Use oracle
-    q.useOracle(0, Uf);
+    q.Oracle(0, Uf);
+    //q.useOracle(0, Uf);
 
     // Apply Hadamards gate to every qubit except the last one
     idxs.pop_back();
     q.H(idxs);
 
     // Measure every qubit except the last one
-    q.measure(idxs);
+    q.measureEnd(idxs);
 }
-
-int main() {
-    // QTC
-    /*
-    cout << "QUANTUM TELEPORTATION\n";
-    quantumTeleportationCircuit();
-
-    cout << "\n----------------------\n\n" << "DEUTSCH-JOZSA ALGORITHM\n";
-    algorithmDeutschJozsa();
-<<<<<<< HEAD
-*/
-    // cout << "----------------------\n\n" << "QFT\n";
-    // int n = 13;
-    // clock_t start,end;
-    // // matrix M = QFTm(n);
-    // qcs q = qcs(string(n,'0'));
-    // start = clock();
-    // matrix M = QFTm(1);
-    // q.useOracles({0,1,2,3,4,5,6,7,8,9,10,11}, Hm);
-    // end = clock();
-    // // print(q.qubits);
-    // // q.results();
-
-    // cout << ((float)(end-start))*1000/(CLOCKS_PER_SEC) << ' ';
-
-    // qcs q1 = qcs(string(n,'0'));
-    // start = clock();
-    // matrix M1 = QFTm(n);
-    // q1.useOracle(0, M1);
-    // end = clock();
-
-    // cout << ((float)(end-start))*1000/(CLOCKS_PER_SEC);
-/*
-    print(QFTm2);
-    print(multiply(QFTm2, {1,0,0,0}));
-*/
-
+void displayCircuitTEST(){
     circuitView view;
     view.begin("001");
         
@@ -184,19 +149,28 @@ int main() {
     view.smallControlledBox("CXX", 0);
     view.smallControlledBox("CXX34", 0);
      
-    view.measureBox(1,0);
-    view.measureBox(2,0);
-    view.measureBox(0,4);
-    view.measureBox(1,2);
+    view.measureAndSave(1,0);
+    view.measureAndSave(2,0);
+    view.measureAndSave(0,4);
+    view.measureAndSave(1,2);
+
+    view.smallInvControlledBox("CVC", 1);
+    view.smallInvControlledBox("CV", 0);
     view.displayCircuit();
-=======
+}
+int main() {
+    // QTC
+    cout << "QUANTUM TELEPORTATION\n";
+    quantumTeleportationCircuit();
+
+    cout << "\n----------------------\n\n" << "DEUTSCH-JOZSA ALGORITHM\n";
+    algorithmDeutschJozsa();
 
     cout << "----------------------\n\n" << "SUPERDENSE CODING\n";
     cout << "Type the message to be sent: ";
     string msg;
     cin >> msg;
     superdenseCoding(msg);
->>>>>>> a106342f6d2455290ffe2efc912de21ee542409d
 
     return 0;
 }

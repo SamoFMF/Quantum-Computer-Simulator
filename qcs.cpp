@@ -21,7 +21,7 @@ struct qcs {
     // Create random generator and distribution
     mt19937_64 generator; // This will be initialized based on current time
     uniform_real_distribution<double> distribution; // This will be initialized to interval [0,1]
-    string neki;
+
     circuitView view;
 
 
@@ -47,6 +47,12 @@ struct qcs {
     */
     qcs(matrix Q) : generator((unsigned int) time(0)), distribution(0, 1) {
         setupQubits(Q);
+        string input = " ";
+        for (int i = 0; i < Q.size()-1; i++)
+        {
+            input += " ";
+        }
+        view.begin(input);
     }
 
     void setupQubits(matrix &M) {
@@ -112,6 +118,20 @@ struct qcs {
         qubits = multiply(M, qubits);
     }
 
+    // useOracles circuit display version.
+    void Oracles(vector<unsigned int> idxs, const matrix Oracle){
+        useOracles(idxs, vector<matrix>(idxs.size(), Oracle));
+        
+        if(round(sqrt(Oracle.size())) == 2){
+            view.smallBox("Oracle", idxs);
+        }else{
+            for (int i = 0; i < idxs.size(); i++)
+            {
+                view.bigBox("Oracle",round(sqrt(Oracle.size())), idxs[i]);   
+            }
+        }
+    }
+
     void useOracles(vector<unsigned int> idxs, const matrix Oracle) {
         useOracles(idxs, vector<matrix>(idxs.size(), Oracle));
     }
@@ -127,6 +147,9 @@ struct qcs {
         -matrix Oracle: oracle in matrix form which is used
             on i'th (and any subsequent indices if needed) qubit
     */
+    void Oracle(unsigned int i, const matrix &Oracle) {
+        Oracles({i}, {Oracle});
+    }
     void useOracle(unsigned int i, const matrix &Oracle) {
         useOracles({i}, {Oracle});
     }
@@ -258,6 +281,7 @@ struct qcs {
             idxs[i] = i;
         }
         H(idxs);
+        view.smallBox("H",idxs);
     }
 
     /*
@@ -320,14 +344,14 @@ struct qcs {
     */
     void CX2(unsigned int idx = 0) {
         useOracle(idx, CX2m);
-        view.smallControlledBox("CNOT2",idx);
+        view.smallInvControlledBox("CNOT2",idx);
     }
 
     void CX2(vector<unsigned int> idxs) {
         useOracles(idxs, CX2m);
         for (int i = 0; i < idxs.size(); i++)
         {
-            view.smallControlledBox("CNOT2",idxs[i]);
+            view.smallInvControlledBox("CNOT2",idxs[i]);
         }   
     }
 
@@ -387,23 +411,17 @@ struct qcs {
     */
     void CR(unsigned int idx = 0, double phi = 0) {
         useOracle(idx, CRm(phi));
-        view.smallControlledBox("CR",idx);
+        view.smallBox("CR",{idx});
     }
 
     void CR(vector<unsigned int> idxs, double phi) {
         useOracles(idxs, CRm(phi));
-        for (int i = 0; i < idxs.size(); i++)
-        {
-            view.smallControlledBox("CR",idxs[i]);
-        }  
+        view.smallBox("CR",idxs);
     }
 
     void CR(vector<unsigned int> idxs) {
         useOracles(idxs, CRm(0));
-        for (int i = 0; i < idxs.size(); i++)
-        {
-            view.smallControlledBox("CR",idxs[i]);
-        }  
+        view.smallBox("CR",idxs);
     }
 
     void CR(unsigned int i, unsigned int j, double phi) {
@@ -452,6 +470,7 @@ struct qcs {
     */
     void QFT(unsigned int idx = 0, unsigned int size = 1) {
         useOracle(idx, QFTm(size));
+
     }
 
     /*
@@ -569,16 +588,31 @@ struct qcs {
 
         cout << "Measured qubits: " << measuredString << '\n';
 
+        view.smallBox("M",idxs);
         return measuredString;
     }
 
     string measure() {
         return measure(vector<unsigned int>(0));
     }
+    
+    void measureEnd() {
+        measure(vector<unsigned int>(0));
+        view.displayCircuit();
+    }
 
     string measure(unsigned int idx) {
         vector<unsigned int> idxs = {idx};
         return measure(idxs);
+    }
+    void measureEnd(vector<unsigned int> idxs) {
+        measure(idxs);
+        view.displayCircuit();
+    }
+    void measureEnd(unsigned int idx) {
+        vector<unsigned int> idxs = {idx};
+        measure(idxs);
+        view.displayCircuit();
     }
 
     bool measureAndSave(unsigned int idx = 0, int idxReg = -1) {
@@ -610,7 +644,7 @@ struct qcs {
             // Register already exists, save measurement into it
             cr[idxReg] = randIdx;
         }
-
+        view.measureAndSave(idx,idxReg);
         return randIdx;
     }
 
@@ -622,6 +656,11 @@ struct qcs {
         -double err (default 1e-16): the probability below which a position
             is considered to have probability of 0 and is not displayed.
     */
+    void resultsEnd(vector<unsigned int> idxs = {}, double err = 1e-16){
+        results(idxs, err);
+        view.displayCircuit();
+    }
+
     void results(vector<unsigned int> idxs = {}, double err = 1e-16) {
         // No args: add all qubits
         if (idxs.empty()) {
